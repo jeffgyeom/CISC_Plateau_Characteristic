@@ -474,70 +474,81 @@ class SuperSbox:
         self.valid_trails_dict = dict()
 
         if set_load == False:
-            if self.is_matrix_permutation == False:
-                I0 = self.field_list
-                I1 = self.field_list
-                I2 = self.field_list
-                I3 = self.field_list
-            else:
-                I0 = list(range(self.sboxsize))
-                I1 = list(range(self.sboxsize))
-                I2 = list(range(self.sboxsize))
-                I3 = list(range(self.sboxsize))
+            I0 = list(range(self.sboxsize))
+            I1 = list(range(self.sboxsize))
+            I2 = list(range(self.sboxsize))
+            I3 = list(range(self.sboxsize))
         else:
-            if self.is_matrix_permutation == False:
-                I0 = [self.hex_to_field_ele(x) for x in load_vec[0]]
-                I1 = [self.hex_to_field_ele(x) for x in load_vec[1]]
-                I2 = [self.hex_to_field_ele(x) for x in load_vec[2]]
-                I3 = [self.hex_to_field_ele(x) for x in load_vec[3]]
-            else:
-                I0 = [x for x in load_vec[0]]
-                I1 = [x for x in load_vec[1]]
-                I2 = [x for x in load_vec[2]]
-                I3 = [x for x in load_vec[3]]
+            I0 = [int(x) for x in load_vec[0]]
+            I1 = [int(x) for x in load_vec[1]]
+            I2 = [int(x) for x in load_vec[2]]
+            I3 = [int(x) for x in load_vec[3]]
 
+
+        in_vec = [0] * 4
+        ou_vec = [0] * 4
         for i0 in I0:
+            in_vec[0] = i0
+            Mi0 = self.MatMul[0][i0]
+            ou_vec[0] = ou_vec[0] ^^ Mi0[0]
+            ou_vec[1] = ou_vec[1] ^^ Mi0[1]
+            ou_vec[2] = ou_vec[2] ^^ Mi0[2]
+            ou_vec[3] = ou_vec[3] ^^ Mi0[3]
             for i1 in I1:
+                in_vec[1] = i1
+                Mi1 = self.MatMul[1][i1]
+                ou_vec[0] = ou_vec[0] ^^ Mi1[0]
+                ou_vec[1] = ou_vec[1] ^^ Mi1[1]
+                ou_vec[2] = ou_vec[2] ^^ Mi1[2]
+                ou_vec[3] = ou_vec[3] ^^ Mi1[3]
                 for i2 in I2:
+                    in_vec[2] = i2
+                    Mi2 = self.MatMul[2][i2]
+                    ou_vec[0] = ou_vec[0] ^^ Mi2[0]
+                    ou_vec[1] = ou_vec[1] ^^ Mi2[1]
+                    ou_vec[2] = ou_vec[2] ^^ Mi2[2]
+                    ou_vec[3] = ou_vec[3] ^^ Mi2[3]
                     for i3 in I3:
-                        if self.is_matrix_permutation == False:
-                            in_vec = vector(self.field, [i0, i1, i2, i3])
-                            ou_vec = self.mat * in_vec
-                            num_act = 0
-                            how_many = 1
-                            for idx in range(4):
-                                ii = int(in_vec[idx]._int_repr())
-                                oi = int(ou_vec[idx]._int_repr())
-                                if ii != 0:
-                                    num_act+=1
-                                    how_many *= (len(self.in_set_uniform4_fix_ou[ii]) + len(self.in_set_uniform2_fix_ou[ii]))
-                                if oi != 0:
-                                    num_act+=1
-                                    how_many *= (len(self.ou_set_uniform4_fix_in[oi]) + len(self.ou_set_uniform2_fix_in[oi]))
-                        else:
-                            t_in_vec = vector(GF(2), self.hex_to_vec(i0, reverse=True) + self.hex_to_vec(i1, reverse=True) + self.hex_to_vec(i2, reverse=True) + self.hex_to_vec(i3, reverse=True))
-                            t_ou_vec = self.mat * t_in_vec
-                            in_vec   = [i0, i1, i2, i3]
-                            ou_vec   = []
-                            num_act = 0
-                            how_many = 1
-                            for idx in range(4):
-                                ou_vec.append(self.vec_to_hex(t_ou_vec[idx * self.sboxbsz : (idx + 1) * self.sboxbsz], reverse=True))
-
-                            for idx in range(4):
-                                ii = in_vec[idx]
-                                oi = ou_vec[idx]
-                                if ii != 0:
-                                    num_act+=1
-                                    how_many *= (len(self.in_set_uniform4_fix_ou[ii]) + len(self.in_set_uniform2_fix_ou[ii]))
-                                if oi != 0:
-                                    num_act+=1
-                                    how_many *= (len(self.ou_set_uniform4_fix_in[oi]) + len(self.ou_set_uniform2_fix_in[oi]))
+                        in_vec[3] = i3
+                        Mi3 = self.MatMul[3][i3]
+                        ou_vec[0] = ou_vec[0] ^^ Mi3[0]
+                        ou_vec[1] = ou_vec[1] ^^ Mi3[1]
+                        ou_vec[2] = ou_vec[2] ^^ Mi3[2]
+                        ou_vec[3] = ou_vec[3] ^^ Mi3[3]
+                        #Core
+                        num_act = 0
+                        how_many = 1
+                        for idx in range(4):
+                            ii = in_vec[idx]
+                            oi = ou_vec[idx]
+                            if ii != 0:
+                                num_act+=1
+                                how_many *= (len(self.in_set_uniform4_fix_ou[ii]) + len(self.in_set_uniform2_fix_ou[ii]))
+                            if oi != 0:
+                                num_act+=1
+                                how_many *= (len(self.ou_set_uniform4_fix_in[oi]) + len(self.ou_set_uniform2_fix_in[oi]))
 
                         if num_act not in self.valid_trails_dict.keys():
                             self.valid_trails_dict[num_act] = how_many
                         else:
                             self.valid_trails_dict[num_act] += how_many
+
+                        ou_vec[0] = ou_vec[0] ^^ Mi3[0]
+                        ou_vec[1] = ou_vec[1] ^^ Mi3[1]
+                        ou_vec[2] = ou_vec[2] ^^ Mi3[2]
+                        ou_vec[3] = ou_vec[3] ^^ Mi3[3]
+                    ou_vec[0] = ou_vec[0] ^^ Mi2[0]
+                    ou_vec[1] = ou_vec[1] ^^ Mi2[1]
+                    ou_vec[2] = ou_vec[2] ^^ Mi2[2]
+                    ou_vec[3] = ou_vec[3] ^^ Mi2[3]
+                ou_vec[0] = ou_vec[0] ^^ Mi1[0]
+                ou_vec[1] = ou_vec[1] ^^ Mi1[1]
+                ou_vec[2] = ou_vec[2] ^^ Mi1[2]
+                ou_vec[3] = ou_vec[3] ^^ Mi1[3]
+            ou_vec[0] = ou_vec[0] ^^ Mi0[0]
+            ou_vec[1] = ou_vec[1] ^^ Mi0[1]
+            ou_vec[2] = ou_vec[2] ^^ Mi0[2]
+            ou_vec[3] = ou_vec[3] ^^ Mi0[3]
 
         return self.valid_trails_dict
 
