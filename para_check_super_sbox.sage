@@ -64,9 +64,8 @@ def GO_PROCESS2(LOCK, PROC_NUM, RST_PATH, SHARED_INFO):
         #######################################################################
         if DONE_FLAG == True:
             break
-        
         valid_trails_dict = S.get_num_valid_trails(set_load = True, load_vec = LOAD_VECS[pidx])
-
+        
         with open(os.path.join(RST_PATH, "%d_vaild_trails_file.pickle"%(pidx)), "wb") as f:
             pickle.dump(valid_trails_dict, f)
 
