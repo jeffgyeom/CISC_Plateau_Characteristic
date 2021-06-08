@@ -1,6 +1,8 @@
 
 super_sbox_dict = dict()
-
+#At the moment, 8-bit S-box is not available due to the infeasible computation effort.
+#I'm trying to reconstruct the model again by limiting the Mixcolumns(Mix).
+'''
 super_sbox_dict["AES"] = {
     "sbox" : 
     [
@@ -31,7 +33,7 @@ super_sbox_dict["AES"] = {
         [0x03, 0x01, 0x01, 0x02]
     ]
 }
-
+'''
 super_sbox_dict["LED"] = {
     "sbox" : 
     [0xC, 0x5, 0x6, 0xB, 0x9, 0x0, 0xA, 0xD, 0x3, 0xE, 0xF, 0x8, 0x4, 0x7, 0x1, 0x2],

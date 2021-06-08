@@ -174,8 +174,8 @@ if __name__ == "__main__":
 
     for alg in sorted(list(super_sbox_dict.keys())):
         print(alg.upper())
-    ALGNAME = 'midori'#str(input("algname > "))
-
+    ALGNAME = str(input("algname > "))
+    
     #For the user
     S_PARA = SuperSboxPara(super_sbox_dict[ALGNAME.upper()]["sbox"], 
                         super_sbox_dict[ALGNAME.upper()]["field"], 
